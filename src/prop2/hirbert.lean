@@ -26,4 +26,7 @@ begin
   assumption,
 end
 
+theorem deduction_H (Γ : set Formula) (φ ψ : Formula) 
+  : (Γ ∪ {φ} ⊢ₕ ψ) ↔ (Γ ⊢ₕ (φ ⊃ ψ)) := deduction AxiomH _ _ _
+
 end prop

@@ -38,7 +38,6 @@ begin
   assumption,
 end
 
-
 lemma proof_subset (Ax : set Formula) (Γ Γ' : set Formula) (φ : Formula) 
   : Γ ⊆ Γ' → (Γ ⊢[Ax] φ) → (Γ' ⊢[Ax] φ) :=
 begin
@@ -84,6 +83,18 @@ begin
     assumption,
     assumption,
   },
+end
+ 
+theorem deduction (AX : set Formula)
+  : ∀ {Γ φ ψ}, (Γ ∪ {φ} ⊢[AX] ψ) ↔ (Γ ⊢[AX] (φ ⊃ ψ)) :=
+begin
+  intros Γ φ ψ,
+  split,
+
+  intro h,
+  sorry,
+
+  sorry,
 end
 
 end prop
