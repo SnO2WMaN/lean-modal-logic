@@ -14,4 +14,5 @@ notation (name := Formula.neg) `¬'` φ: 60 := φ →' ⊥'
 notation (name := Formula.disj) φ `∨'` ψ:50 := (¬'φ →' ψ)
 notation (name := Formula.conj) φ `∧'` ψ:50 := ¬'(¬'φ ∨' ¬'ψ)
 notation (name := Formula.equiv) φ `↔'` ψ:45 := (φ →' ψ) ∧' (ψ →' φ)
+
 end prop

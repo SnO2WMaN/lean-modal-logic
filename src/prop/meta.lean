@@ -2,43 +2,29 @@ import tactic data.set
 import prop.language prop.semantics prop.syntax
  
 namespace prop
-  
-def consistentL := consistent AxiomL
-def inconsistentL := inconsistent AxiomL
 
-def soundness (AX : set Formula) := ∀ {Γ φ}, (Γ ⊢[AX] φ) → (Γ ⊨ φ)
-def completeness (AX : set Formula) := ∀ {Γ φ}, (Γ ⊨ φ) → (Γ ⊢[AX] φ)
-
-lemma lemma_2_10 (Γ φ) : (Γ ⊢ₗ φ) → (Γ ⊢ₗ ¬'φ) → consistentL Γ :=
-begin
-  intros ht hf,
-  sorry,
-end
-
-lemma lemma_2_10' (Γ φ) : inconsistentL Γ → ((Γ ⊢ₗ φ) ∨ (Γ ⊢ₗ ¬'φ)) :=
-begin
-  sorry,
-end
-
-lemma lemma_2_11 (Γ φ) : consistentL (Γ ∩ {φ}) → (Γ ⊢ₗ φ) := 
+lemma axiomL_tautology (φ) : φ ∈ AxiomL → (⊨ φ) := 
 begin
   intro h,
-  sorry 
+  cases h,
+  case P1: {
+    sorry
+  },
+  case P2: {
+    sorry
+  },
+  case P3: {
+    sorry
+  },
 end
 
-lemma lemma_2_12 (Γ φ) : inconsistentL Γ → (inconsistentL (Γ ∪ {φ})) ∨ (inconsistentL (Γ ∪ {φ})) :=
+lemma sounds (φ) : ⊢ₗ φ → ⊨ φ :=
 begin
-  sorry
-end
-
-theorem soundness_L : soundness AxiomL :=
-begin
-  intros Γ φ,
   intro he,
   induction he,
   
-  case in_axioms :{
-    sorry,
+  case in_axioms : _ _ hA {
+    exact @axiomL_tautology _ hA,
   },
 
   case in_context :{
@@ -50,11 +36,17 @@ begin
   },
 end
 
-theorem completeness_L : completeness AxiomL :=
+lemma completes (φ) : ⊨ φ → ⊢ₗ φ :=
 begin
-  intros Γ φ,
   intro hm,
   sorry
+end
+
+theorem completeness (φ) : ⊢ₗ φ ↔ ⊨ φ :=
+begin
+  split,
+  exact @sounds _,
+  exact @completes _,
 end
 
 end prop

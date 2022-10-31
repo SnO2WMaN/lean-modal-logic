@@ -87,6 +87,9 @@ notation `⊢ₗ` φ : 25 := ∅ ⊢ₗ φ
 
 open AxiomL
 
+def consistentL := consistent AxiomL
+def inconsistentL := inconsistent AxiomL
+
 lemma reflexive_L : ∀ {Γ φ}, Γ ⊢ₗ (φ →' φ) :=
 begin
   intros Γ φ,
@@ -162,8 +165,7 @@ begin
   exact h₃,
 end
 
--- explosion! of law
-lemma explosion_L (φ ψ) : (⊢ₗ ¬'φ →' (φ →' ψ)) → ({φ, ¬'φ} ⊢ₗ ψ) :=
+example (φ ψ) : (⊢ₗ ¬'φ →' (φ →' ψ)) → ({φ, ¬'φ} ⊢ₗ ψ) :=
 begin
   intro h,
   have h₁ := (iff.elim_right (@deduction_L ∅ (¬'φ) (φ →' ψ))) h,
@@ -172,6 +174,57 @@ begin
   have h₃ := h₂ h₁,
   rw set.union_def at h₃,
   sorry,
+end
+
+lemma explosion_L (Γ φ) : (Γ ⊢ₗ ⊥') → (Γ ⊢ₗ φ) :=
+begin
+  intro h,
+  have h₁ : (Γ ⊢ₗ ¬'φ) := @append_L _ _ _ h,
+  sorry
+end
+
+lemma explosion_L' (Γ φ ψ) : (Γ ⊢ₗ φ) → (Γ ⊢ₗ ¬'φ) → (Γ ⊢ₗ ψ) :=
+begin
+  intros ht hf,
+  have h₁ : (Γ ⊢ₗ ⊥') := @mp _ _ _ _ hf ht,
+  exact explosion_L _ _ h₁,
+end
+
+lemma lemma_2_9 (Γ φ) : (inconsistentL Γ) → (Γ ⊢ₗ φ) :=
+begin
+  intro hi,
+  exact explosion_L Γ φ hi,
+end
+
+lemma lemma_2_10 (Γ φ) : (Γ ⊢ₗ φ) → (Γ ⊢ₗ ¬'φ) → inconsistentL Γ :=
+begin
+  intros ht hf,
+  exact explosion_L' _ _ ⊥' ht hf,
+end
+
+lemma lemma_2_10' (Γ φ) : consistentL Γ → (Γ ⊢ₗ φ) ∨ (Γ ⊢ₗ ¬'φ) :=
+begin
+  intro hc,
+  sorry,
+end
+
+lemma lemma_2_11 (Γ φ) : (inconsistentL (Γ ∪ {φ})) ↔ (Γ ⊢ₗ ¬'φ) := 
+begin
+  split,
+  intro h,
+  sorry,
+
+  intro h,
+  apply iff.elim_right (@deduction_L Γ φ ⊥'),
+  assumption,
+end
+
+lemma lemma_2_12 (Γ φ) : 
+consistentL Γ → (consistentL (Γ ∪ {φ})) ∨ (consistentL (Γ ∪ {¬'φ})) :=
+begin
+  intro hi,
+  have h₁ : (Γ ⊢ₗ φ) ∨ (Γ ⊢ₗ ¬'φ) := @lemma_2_10' _ _ hi,
+  sorry
 end
 
 end prop

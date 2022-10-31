@@ -7,9 +7,9 @@ def val : Formula → Prop
 | ⊥'        := false
 | (φ →' ψ)  := ¬(val φ) ∨ (val ψ)  
 
-def models (Γ : set Formula) (φ : Formula) : Prop
-  := φ ∈ Γ → val φ
+def models (φ : Formula) : Prop := val φ
 
-notation Γ `⊨` φ : 25 := models Γ φ
+-- notation Γ `⊨` φ : 25 := models Γ φ
+notation `⊨` φ : 25 := models φ
 
 end prop
