@@ -7,25 +7,22 @@ open classical
 namespace prop
 inductive Formula : Type u
   | falso : Formula
-  | neg : Formula → Formula
   | imply : Formula → Formula → Formula
   -- | conj : Formula → Formula → Formula
 
-infixr (name := Formula.imply) `⊃`: 55 := Formula.imply
-prefix (name := Formula.neg) `¬'`: 60 := Formula.neg
 notation (name := Formula.falso) `⊥'` : 85 := Formula.falso
+infixr (name := Formula.imply) `→'`: 55 := Formula.imply
+notation (name := Formula.neg) `¬'` φ: 60 := φ →' ⊥' 
+notation (name := Formula.disj) φ `∨'` ψ:50 := (¬'φ →' ψ)
+notation (name := Formula.conj) φ `∧'` ψ:50 := ¬'(¬'φ ∨' ¬'ψ)
+notation (name := Formula.equiv) φ `↔'` ψ:45 := (φ →' ψ) ∧' (ψ →' φ)
 
--- notation `⊤`:85 := ¬'⊥
-
--- notation φ `∨'` ψ:50 := (¬'φ ⊃ ψ)
--- notation φ `∧'` ψ:50 := ¬'(¬'φ ∨' ¬'ψ)
--- notation φ `↔'` ψ:45 := (φ ⊃ ψ) ∧' (ψ ⊃ φ)
 
 -- proof with context (Γ)
 inductive Proof (Ax : set Formula) : set Formula → set Formula
   | in_axioms : ∀ {Γ φ} {h : φ ∈ Ax}, Proof Γ φ
   | in_context : ∀ {Γ φ} {h : φ ∈ Γ}, Proof Γ φ
-  | mp : ∀ {Γ φ ψ}, Proof Γ (φ ⊃ ψ) → Proof Γ φ → Proof Γ ψ
+  | mp : ∀ {Γ φ ψ}, Proof Γ (φ →' ψ) → Proof Γ φ → Proof Γ ψ
 
 notation Γ `⊢[` Ax `]` φ : 25 := Proof Ax Γ φ 
 
@@ -35,10 +32,10 @@ def consistent (Ax Γ): Prop
   := ¬(inconsistent Ax Γ)
 
 lemma proof_mp_ctx (A : set Formula) (Γ : set Formula) (φ ψ : Formula)
-  : (φ ∈ Γ) → ((φ ⊃ ψ) ∈ Γ) → (Γ ⊢[A] ψ) :=
+  : (φ ∈ Γ) → ((φ →' ψ) ∈ Γ) → (Γ ⊢[A] ψ) :=
 begin
   intros h₁ h₂,
-  have h₃: (Γ ⊢[A] (φ ⊃ ψ)) := @Proof.in_context _ _ _ h₂,
+  have h₃: (Γ ⊢[A] (φ →' ψ)) := @Proof.in_context _ _ _ h₂,
   have h₄: (Γ ⊢[A] φ) := @Proof.in_context _ _ _ h₁,
   have h₅: (Γ ⊢[A] ψ) := @Proof.mp _ _ _ _ h₃ h₄,
   assumption,
@@ -90,5 +87,17 @@ begin
     assumption,
   },
 end
+
+def val : Formula → Prop
+| ⊥'        := false
+| (φ →' ψ)  := ¬(val φ) ∨ (val ψ)  
+
+def models (Γ : set Formula) (φ : Formula) : Prop
+  := φ ∈ Γ → val φ
+
+notation Γ `⊨` φ : 25 := models Γ φ
+
+def soundness (AX : set Formula) := ∀ {Γ φ}, (Γ ⊢[AX] φ) → (Γ ⊨ φ)
+def completeness (AX : set Formula) := ∀ {Γ φ}, (Γ ⊨ φ) → (Γ ⊢[AX] φ)
 
 end prop

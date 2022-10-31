@@ -6,24 +6,24 @@ open Proof
 
 -- Łukasiewicz
 inductive AxiomL : set Formula
-  | P1 : ∀ {φ ψ}, AxiomL $ φ ⊃ (ψ ⊃ φ)
-  | P2 : ∀ {φ ψ χ}, AxiomL $ (φ ⊃ (ψ ⊃ χ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ))
-  | P3 : ∀ {φ ψ}, AxiomL $ (¬φ ⊃ ¬ψ) ⊃ (φ ⊃ ψ)
+  | P1 : ∀ {φ ψ}, AxiomL $ φ →' (ψ →' φ)
+  | P2 : ∀ {φ ψ χ}, AxiomL $ (φ →' (ψ →' χ)) →' ((φ →' ψ) →' (φ →' χ))
+  | P3 : ∀ {φ ψ}, AxiomL $ (¬'φ →' ¬'ψ) →' (φ →' ψ)
 
 notation Γ `⊢ₗ` φ : 25 := Γ ⊢[AxiomL] φ
 notation `⊢ₗ` φ : 25 := ∅ ⊢ₗ φ
 
 open AxiomL
-lemma reflexive_L : ∀ {Γ φ}, Γ ⊢ₗ (φ ⊃ φ) :=
+lemma reflexive_L : ∀ {Γ φ}, Γ ⊢ₗ (φ →' φ) :=
 begin
   intros Γ φ,
-  have h₁ : (Γ ⊢ₗ (φ ⊃ ((φ ⊃ φ) ⊃ φ)) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ (φ ⊃ φ))),
+  have h₁ : (Γ ⊢ₗ (φ →' ((φ →' φ) →' φ)) →' ((φ →' (φ →' φ)) →' (φ →' φ))),
     apply in_axioms,
     apply P2,
-  have h₂ : (Γ ⊢ₗ (φ ⊃ (φ ⊃ φ) ⊃ φ)),
+  have h₂ : (Γ ⊢ₗ (φ →' (φ →' φ) →' φ)),
     apply in_axioms,
     apply P1,
-  have h₃ : (Γ ⊢ₗ φ ⊃ (φ ⊃ φ)),
+  have h₃ : (Γ ⊢ₗ φ →' (φ →' φ)),
     apply in_axioms,
     apply P1,
     
@@ -34,10 +34,10 @@ end
 
 
 -- lemma append_L
---   : ∀ {Γ φ ψ}, (Γ ⊢ₗ φ) → (Γ ⊢ₗ (ψ ⊃ φ)) :=
+--   : ∀ {Γ φ ψ}, (Γ ⊢ₗ φ) → (Γ ⊢ₗ (ψ →' φ)) :=
 -- begin
 --   intros Γ φ ψ h,
---   have h₁ : (Γ ⊢ₗ ψ ⊃ (φ ⊃ ψ)), 
+--   have h₁ : (Γ ⊢ₗ ψ →' (φ →' ψ)), 
 --     apply in_axioms,
 --     sorry,
 --   
@@ -45,10 +45,10 @@ end
 --   exact @mp AxiomL Γ φ ψ , 
 -- end
 lemma append_L
-  : ∀ {Γ φ ψ}, (Γ ⊢ₗ ψ) → (Γ ⊢ₗ φ ⊃ ψ) := sorry
+  : ∀ {Γ φ ψ}, (Γ ⊢ₗ ψ) → (Γ ⊢ₗ φ →' ψ) := sorry
 
 theorem deduction_L
-  : ∀ {Γ φ ψ}, (Γ ∪ {φ} ⊢ₗ ψ) ↔ (Γ ⊢ₗ (φ ⊃ ψ)) :=
+  : ∀ {Γ φ ψ}, (Γ ∪ {φ} ⊢ₗ ψ) ↔ (Γ ⊢ₗ (φ →' ψ)) :=
 begin
   intros Γ φ ψ,
   split,
@@ -82,7 +82,7 @@ begin
   sorry,
 end
 
-example (φ ψ) : (⊢ₗ φ ⊃ ψ) → ({φ} ⊢ₗ ψ) := 
+example (φ ψ) : (⊢ₗ φ →' ψ) → ({φ} ⊢ₗ ψ) := 
 begin
   intro h,
   have h₃ := (iff.elim_right (@deduction_L ∅ φ ψ)) h,
@@ -91,10 +91,10 @@ begin
 end
 
 -- explosion! of law
-example (φ ψ) : (⊢ₗ ¬'φ ⊃ (φ ⊃ ψ)) → ({φ, ¬'φ} ⊢ₗ ψ) :=
+example (φ ψ) : (⊢ₗ ¬'φ →' (φ →' ψ)) → ({φ, ¬'φ} ⊢ₗ ψ) :=
 begin
   intro h,
-  have h₁ := (iff.elim_right (@deduction_L ∅ (¬'φ) (φ ⊃ ψ))) h,
+  have h₁ := (iff.elim_right (@deduction_L ∅ (¬'φ) (φ →' ψ))) h,
   rw set.empty_union at h₁,
   have h₂ := (iff.elim_right (@deduction_L {¬'φ} φ ψ)),
   have h₃ := h₂ h₁,
@@ -119,10 +119,18 @@ end
 lemma lemma_2_11 (Γ φ) : consistentL (Γ ∩ {φ}) → (Γ ⊢ₗ φ) := 
 begin
   intro h,
-  sorry
+  sorry 
 end
 
 lemma lemma_2_12 (Γ φ) : inconsistentL Γ → (inconsistentL (Γ ∪ {φ})) ∨ (inconsistentL (Γ ∪ {φ})) :=
+begin
+  sorry
+end
+
+def soundnessL := soundness AxiomL
+def completenessL := completeness AxiomL
+
+theorem completeness_L : completenessL :=
 begin
   sorry
 end
