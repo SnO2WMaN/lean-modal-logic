@@ -127,11 +127,29 @@ begin
   sorry
 end
 
-def soundnessL := soundness AxiomL
-def completenessL := completeness AxiomL
-
-theorem completeness_L : completenessL :=
+theorem soundness_L : soundness AxiomL :=
 begin
+  intros Γ φ,
+  intro he,
+  induction he,
+  
+  case in_axioms :{
+    sorry,
+  },
+
+  case in_context :{
+    sorry,
+  },
+
+  case mp :{
+    sorry,
+  },
+end
+
+theorem completeness_L : completeness AxiomL :=
+begin
+  intros Γ φ,
+  intro hm,
   sorry
 end
 
