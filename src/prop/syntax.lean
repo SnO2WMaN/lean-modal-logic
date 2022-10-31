@@ -2,7 +2,79 @@ import tactic data.set
 import prop.language
 
 namespace prop
+
+-- proof with context (Γ)
+inductive Proof (Ax : set Formula) : set Formula → set Formula
+  | in_axioms : ∀ {Γ φ} {h : φ ∈ Ax}, Proof Γ φ
+  | in_context : ∀ {Γ φ} {h : φ ∈ Γ}, Proof Γ φ
+  | mp : ∀ {Γ φ ψ}, Proof Γ (φ →' ψ) → Proof Γ φ → Proof Γ ψ
+
+notation Γ `⊢[` Ax `]` φ : 25 := Proof Ax Γ φ 
+notation `⊢[` Ax `]` φ : 25 := Proof Ax ∅ φ 
+
 open Proof
+
+def inconsistent (Ax Γ) : Prop
+  := Γ ⊢[Ax] ⊥'
+def consistent (Ax Γ): Prop
+  := ¬(inconsistent Ax Γ)
+
+lemma proof_mp_ctx (A : set Formula) (Γ : set Formula) (φ ψ : Formula)
+  : (φ ∈ Γ) → ((φ →' ψ) ∈ Γ) → (Γ ⊢[A] ψ) :=
+begin
+  intros h₁ h₂,
+  have h₃: (Γ ⊢[A] (φ →' ψ)) := @Proof.in_context _ _ _ h₂,
+  have h₄: (Γ ⊢[A] φ) := @Proof.in_context _ _ _ h₁,
+  have h₅: (Γ ⊢[A] ψ) := @Proof.mp _ _ _ _ h₃ h₄,
+  assumption,
+end
+
+lemma proof_subset (Ax : set Formula) (Γ Γ' : set Formula) (φ : Formula) 
+  : Γ ⊆ Γ' → (Γ ⊢[Ax] φ) → (Γ' ⊢[Ax] φ) :=
+begin
+  intros h₁ h₂,
+  induction h₂,
+  
+  case in_axioms :{
+    apply Proof.in_axioms,
+    assumption,
+  },
+
+  case in_context :{
+    apply Proof.in_context,
+    tauto,
+  },
+
+  case mp : _ _ _ _ _ ih₁ ih₂ {
+    have h₃ := ih₁ h₁,
+    have h₄ := ih₂ h₁,
+    exact @Proof.mp _ _ _ _ h₃ h₄,
+  },
+end
+
+lemma lift_subset (AX₁ AX₂ : set Formula) (Γ : set Formula) (φ : Formula)
+  : AX₁ ⊆ AX₂ → (Γ ⊢[AX₁] φ) → (Γ ⊢[AX₂] φ) :=
+begin
+  intros hax h₁,
+  induction h₁,
+  
+  case in_axioms :{
+    apply Proof.in_axioms,
+    apply hax,
+    assumption,
+  },
+
+  case in_context :{
+    apply Proof.in_context,
+    tauto,
+  },
+
+  case mp {
+    apply Proof.mp,
+    assumption,
+    assumption,
+  },
+end 
 
 -- Łukasiewicz
 inductive AxiomL : set Formula
@@ -14,6 +86,7 @@ notation Γ `⊢ₗ` φ : 25 := Γ ⊢[AxiomL] φ
 notation `⊢ₗ` φ : 25 := ∅ ⊢ₗ φ
 
 open AxiomL
+
 lemma reflexive_L : ∀ {Γ φ}, Γ ⊢ₗ (φ →' φ) :=
 begin
   intros Γ φ,
@@ -31,7 +104,6 @@ begin
   have h₅ := @mp _ _ _ _ h₄ h₃,
   assumption,
 end
-
 
 -- lemma append_L
 --   : ∀ {Γ φ ψ}, (Γ ⊢ₗ φ) → (Γ ⊢ₗ (ψ →' φ)) :=
@@ -91,7 +163,7 @@ begin
 end
 
 -- explosion! of law
-example (φ ψ) : (⊢ₗ ¬'φ →' (φ →' ψ)) → ({φ, ¬'φ} ⊢ₗ ψ) :=
+lemma explosion_L (φ ψ) : (⊢ₗ ¬'φ →' (φ →' ψ)) → ({φ, ¬'φ} ⊢ₗ ψ) :=
 begin
   intro h,
   have h₁ := (iff.elim_right (@deduction_L ∅ (¬'φ) (φ →' ψ))) h,
@@ -100,57 +172,6 @@ begin
   have h₃ := h₂ h₁,
   rw set.union_def at h₃,
   sorry,
-end
-
-def consistentL := consistent AxiomL
-def inconsistentL := inconsistent AxiomL
-
-lemma lemma_2_10 (Γ φ) : (Γ ⊢ₗ φ) → (Γ ⊢ₗ ¬'φ) → consistentL Γ :=
-begin
-  intros ht hf,
-  sorry,
-end
-
-lemma lemma_2_10' (Γ φ) : inconsistentL Γ → ((Γ ⊢ₗ φ) ∨ (Γ ⊢ₗ ¬'φ)) :=
-begin
-  sorry,
-end
-
-lemma lemma_2_11 (Γ φ) : consistentL (Γ ∩ {φ}) → (Γ ⊢ₗ φ) := 
-begin
-  intro h,
-  sorry 
-end
-
-lemma lemma_2_12 (Γ φ) : inconsistentL Γ → (inconsistentL (Γ ∪ {φ})) ∨ (inconsistentL (Γ ∪ {φ})) :=
-begin
-  sorry
-end
-
-theorem soundness_L : soundness AxiomL :=
-begin
-  intros Γ φ,
-  intro he,
-  induction he,
-  
-  case in_axioms :{
-    sorry,
-  },
-
-  case in_context :{
-    sorry,
-  },
-
-  case mp :{
-    sorry,
-  },
-end
-
-theorem completeness_L : completeness AxiomL :=
-begin
-  intros Γ φ,
-  intro hm,
-  sorry
 end
 
 end prop
