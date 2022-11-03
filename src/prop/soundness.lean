@@ -3,7 +3,7 @@ import prop.language prop.semantics prop.syntax
  
 namespace prop
 
-lemma axiomL_tautology (φ) : φ ∈ AxiomL → (⊨ φ) := 
+lemma axiomL_tautology (v φ) : φ ∈ AxiomL → (v ⊨ φ) := 
 begin
   intro h,
   cases h,
@@ -18,13 +18,13 @@ begin
   },
 end
 
-lemma sounds (φ) : ⊢ₗ φ → ⊨ φ :=
+theorem soundness (v φ) : ⊢ₗ φ → v ⊨ φ :=
 begin
   intro he,
   induction he,
   
   case in_axioms : _ _ hA {
-    exact @axiomL_tautology _ hA,
+    exact @axiomL_tautology v _ hA,
   },
 
   case in_context :{
@@ -34,19 +34,6 @@ begin
   case mp :{
     sorry,
   },
-end
-
-lemma completes (φ) : ⊨ φ → ⊢ₗ φ :=
-begin
-  intro hm,
-  sorry
-end
-
-theorem completeness (φ) : ⊢ₗ φ ↔ ⊨ φ :=
-begin
-  split,
-  exact @sounds _,
-  exact @completes _,
 end
 
 end prop

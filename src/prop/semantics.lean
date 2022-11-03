@@ -3,13 +3,14 @@ import prop.language
  
 namespace prop
  
-def val : Formula → Prop
-| ⊥'        := false
-| (φ →' ψ)  := ¬(val φ) ∨ (val ψ)  
+def satisfy (v : ℕ → Prop) : Formula → Prop
+| (Formula.var p) := v p
+| ⊥'              := false
+| (φ →' ψ)        := satisfy φ → satisfy ψ
 
-def models (φ : Formula) : Prop := val φ
+def models (v : ℕ → Prop) (φ : Formula) : Prop := satisfy v φ
 
--- notation Γ `⊨` φ : 25 := models Γ φ
-notation `⊨` φ : 25 := models φ
+notation `[`v`]` `⊨` φ :25 := models v φ
+infix `⊨` :25 := models
 
 end prop
