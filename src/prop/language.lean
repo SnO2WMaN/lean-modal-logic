@@ -9,7 +9,7 @@ inductive Formula : Type u
   | imply : Formula → Formula → Formula
 
 notation (name := Formula.falso) `⊥'` : 85 := Formula.falso
-infixr (name := Formula.imply) `→'`: 55 := Formula.imply
+infixr (name := Formula.imply) ` →' `: 55 := Formula.imply
 
 def Formula.neg (φ) : Formula := φ →' ⊥' 
 prefix `¬'`: 60 := Formula.neg
