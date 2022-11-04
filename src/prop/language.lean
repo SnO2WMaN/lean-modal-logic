@@ -23,4 +23,7 @@ infixl ` ∧' ` :50 := Formula.conj
 def Formula.equiv (φ ψ) : Formula := (φ →' ψ) ∧' (ψ →' φ)
 infix ` ↔' ` :45 := Formula.equiv
 
+def Formula.verum : Formula := ¬'⊥'
+notation `⊤'` :85 := Formula.verum
+
 end prop
